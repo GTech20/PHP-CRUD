@@ -1,33 +1,36 @@
 <?php
-    include("dbconnection.php");
+
+include("dbconnection.php"); // include database connection file and open a connection
+
+/* $_POST data
+    id - input hidden name attribute
+    savedata - input submit name attribute
+    firstname - input text name attribute
+    lastname - input text name attribute
+    email - input text name attribute
+    address - textarea name attribute */
+
+if( isset($_POST['id']) ) {
+    $id = mysqli_real_escape_string($conn, $_POST['id']);
+    $firstname = mysqli_real_escape_string($conn, $_POST['filename']);
+    $lastname = mysqli_real_escape_string($conn, $_POST['lastname']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $address = mysqli_real_escape_string($conn, $_POST['address']);
+
+    /* update all columns - firstname, lastname, email, address */
+    $update_data = mysqli_query($conn, "UPDATE users SET firstname='" . $firstname . "', lastname='" . $lastname . "', email='" . $email . "', address='" . $address . "' WHERE user_id=" . $id . ";");
+
+    session_start(); // start a session
+
+    if($update_data) {
+        // success response
+        $_SESSION['response_message'] = "User has been successfully updated.";
+    } else {
+        // failed response
+        $_SESSION['response_message'] = "User modification failed.";
+    }
+
+    header("Location: edit.php"); // return to main page
+}
+
 ?>
-<!-- create form -->
-<form action="update.php" method="post">
-    <?php
-        session_start();
-        if(isset($_SESSION['response_message'])) {
-            echo $_SESSION['response_message'];
-            unset($_SESSION['response_message']);
-        }
-    ?>
-    <?php
-        if(isset($_GET['id']) && $_GET['id'] != 0) {
-            $id = mysqli_real_escape_string($conn, $_GET['id']);
-            $get_user_info = mysqli_query($conn, "SELECT * FROM users WHERE user_id=" . $id); // get user with id =1
-            $row = mysqli_fetch_row($get_user_info); // get user data and pass to array
-    ?>
-
-    <!-- This form will show if the above code is true -->
-    <h3>Edit User Information</h3>
-    <input type="hidden" name="id" value="<?php echo $id; ?>" />
-    <p>FirstName: <input type="text" name="firstname" placeholder="First Name" value="<?php echo $row[1]; ?>"></p>
-    <p>LastName: <input type="text" name="lastname" placeholder="Last Name" value="<?php echo $row[2]; ?>"></p>
-    <p>Email: <input type="text" name="email" placeholder="Type your email" value="<?php echo $row[3]; ?>"></p>
-    <p>Address: <textarea name="address" placeholder="Type your address"><?php echo $row[2]; ?></textarea></p>
-    <input type="submit" name="savedata" value="Update Data" />
-
-    <?php
-        }
-    ?>
-    <a href="index.php">Back to Main Page</a>
-</form>
